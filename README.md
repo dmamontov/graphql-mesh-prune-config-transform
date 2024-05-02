@@ -1,0 +1,1 @@
+# graphql-mesh-prune-config-transform
