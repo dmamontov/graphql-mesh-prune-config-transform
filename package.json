@@ -1,5 +1,5 @@
 {
-  "name": "graphql-mesh-prune-config-transform",
+  "name": "@dmamontov/graphql-mesh-prune-config-transform",
   "version": "1.0.0",
   "author": "Dmitry Mamontov",
   "type": "module",
