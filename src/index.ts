@@ -82,7 +82,6 @@ export default class PruneConfigTransform implements Transform {
     ): GraphQLSchema {
         return applySchemaTransforms(
             originalWrappingSchema,
-            // @ts-expect-error
             subschemaConfig,
             transformedSchema,
             this.transformers,
@@ -96,7 +95,6 @@ export default class PruneConfigTransform implements Transform {
     ): ExecutionRequest {
         return applyRequestTransforms(
             originalRequest,
-            // @ts-expect-error
             delegationContext,
             transformationContext,
             this.transformers,
@@ -110,7 +108,6 @@ export default class PruneConfigTransform implements Transform {
     ) {
         return applyResultTransforms(
             originalResult,
-            // @ts-expect-error
             delegationContext,
             transformationContext,
             this.transformers,
