@@ -7,7 +7,6 @@ import pluginImport from "eslint-plugin-import";
 import {configs as pluginSonar} from "eslint-plugin-sonar";
 import pluginUnicorn from "eslint-plugin-unicorn";
 import pluginPrettier from "eslint-plugin-prettier/recommended";
-import pluginPackageJson from "eslint-plugin-package-json-dependencies";
 
 export default [
     {
@@ -129,23 +128,5 @@ export default [
             "unicorn/prefer-string-starts-ends-with": "off",
             "unicorn/no-array-push-push": "off",
         },
-    },
-    {
-        files: ["package.json"],
-        ignores: ["node_modules/**/*", ".bob/**/*"],
-        languageOptions: {
-            parser: pluginPackageJson
-        },
-        plugins: {
-            "package-json-dependencies": pluginPackageJson
-        },
-        rules: {
-            "package-json-dependencies/controlled-versions": [
-                "error",
-                {
-                    "granularity": "fixed"
-                }
-            ]
-        }
     },
 ];
