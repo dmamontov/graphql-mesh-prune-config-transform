@@ -3,10 +3,8 @@ name: Transform CI
 on: [push]
 
 jobs:
-  build:
-
+  lint-and-test:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
       - name: Use Node.js
