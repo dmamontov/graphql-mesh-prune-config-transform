@@ -1,7 +1,9 @@
 import {
+    type GraphQLEnumType,
     type GraphQLEnumValueConfig,
     type GraphQLFieldConfig,
     type GraphQLInputFieldConfig,
+    type GraphQLInputObjectType,
     type GraphQLSchema,
 } from 'graphql';
 import {
@@ -14,13 +16,23 @@ import {
     type SubschemaConfig,
     type Transform,
 } from '@graphql-tools/delegate';
-import { type ExecutionRequest, type ExecutionResult } from '@graphql-tools/utils';
+import {
+    MapperKind,
+    mapSchema,
+    type ExecutionRequest,
+    type ExecutionResult,
+} from '@graphql-tools/utils';
 import {
     TransformCompositeFields,
     TransformEnumValues,
     TransformInputObjectFields,
 } from '@graphql-tools/wrap';
-import { FieldType, type PruneConfigTransformConfig } from './types';
+import {
+    ApplyType,
+    type CompositeType,
+    type FieldConfigType,
+    type PruneConfigTransformConfig,
+} from './types';
 
 export default class PruneConfigTransform implements Transform {
     public noWrap: boolean = false;
@@ -43,7 +55,7 @@ export default class PruneConfigTransform implements Transform {
                         typeName,
                         fieldName,
                         fieldConfig,
-                        FieldType.Field,
+                        ApplyType.Field,
                     ) as GraphQLFieldConfig<any, any>,
             ),
             new TransformInputObjectFields(
@@ -56,7 +68,7 @@ export default class PruneConfigTransform implements Transform {
                         typeName,
                         fieldName,
                         inputFieldConfig,
-                        FieldType.Input,
+                        ApplyType.Input,
                     ) as GraphQLInputFieldConfig,
             ),
             new TransformEnumValues(
@@ -69,7 +81,7 @@ export default class PruneConfigTransform implements Transform {
                         typeName,
                         externalValue,
                         enumValueConfig,
-                        FieldType.Enum,
+                        ApplyType.Enum,
                     ) as GraphQLEnumValueConfig,
             ),
         ];
@@ -80,8 +92,32 @@ export default class PruneConfigTransform implements Transform {
         subschemaConfig: SubschemaConfig,
         transformedSchema?: GraphQLSchema,
     ): GraphQLSchema {
+        const transformedOriginalSchema = mapSchema(originalWrappingSchema, {
+            [MapperKind.INPUT_OBJECT_TYPE]: (typeConfig: GraphQLInputObjectType) =>
+                this.apply(
+                    typeConfig.name,
+                    typeConfig.name,
+                    typeConfig,
+                    ApplyType.Input,
+                ) as GraphQLInputObjectType,
+            [MapperKind.ENUM_TYPE]: (typeConfig: GraphQLEnumType) =>
+                this.apply(
+                    typeConfig.name,
+                    typeConfig.name,
+                    typeConfig,
+                    ApplyType.Enum,
+                ) as GraphQLEnumType,
+            [MapperKind.COMPOSITE_TYPE]: (typeConfig: CompositeType) =>
+                this.apply(
+                    typeConfig.name,
+                    typeConfig.name,
+                    typeConfig,
+                    ApplyType.Field,
+                ) as CompositeType,
+        });
+
         return applySchemaTransforms(
-            originalWrappingSchema,
+            transformedOriginalSchema,
             subschemaConfig,
             transformedSchema,
             this.transformers,
@@ -119,18 +155,15 @@ export default class PruneConfigTransform implements Transform {
     private apply(
         _typeName: string,
         _fieldName: string,
-        fieldConfig:
-            | GraphQLFieldConfig<any, any>
-            | GraphQLInputFieldConfig
-            | GraphQLEnumValueConfig,
-        fieldType: FieldType,
-    ): GraphQLFieldConfig<any, any> | GraphQLInputFieldConfig | GraphQLEnumValueConfig {
+        fieldConfig: FieldConfigType,
+        fieldType: ApplyType,
+    ): FieldConfigType {
         const newFieldConfig = fieldConfig;
         if (this.config.descriptions && !fieldConfig?.extensions?.isCustomDescriptions) {
             if (
-                (this.config.descriptions.fields && fieldType === FieldType.Field) ||
-                (this.config.descriptions.inputs && fieldType === FieldType.Input) ||
-                (this.config.descriptions.enums && fieldType === FieldType.Enum)
+                (this.config.descriptions.fields && fieldType === ApplyType.Field) ||
+                (this.config.descriptions.inputs && fieldType === ApplyType.Input) ||
+                (this.config.descriptions.enums && fieldType === ApplyType.Enum)
             ) {
                 newFieldConfig.description = null;
             }

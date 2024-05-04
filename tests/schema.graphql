@@ -1,0 +1,48 @@
+type Query {
+    """
+    query-test-description
+    """
+    test(input: TestInput): TestResult!
+}
+
+"""
+test-input-description
+"""
+input TestInput {
+    """
+    test-input-field-first-description
+    """
+    first: String!
+    """
+    test-input-field-second-description
+    """
+    second: String!
+}
+
+"""
+test-result-description
+"""
+type TestResult {
+    """
+    test-result-field-first-description
+    """
+    first: String
+    """
+    test-result-field-second-description
+    """
+    second: TestEnum
+}
+
+"""
+test-enum-description
+"""
+enum TestEnum {
+    """
+    test-enum-value-first-description
+    """
+    FIRST
+    """
+    test-enum-value-second-description
+    """
+    SECOND
+}

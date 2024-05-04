@@ -1,113 +1,98 @@
+// eslint-disable-next-line import/no-nodejs-modules
+import * as fs from 'node:fs';
+// eslint-disable-next-line import/no-nodejs-modules
+import * as path from 'node:path';
 import {
-    GraphQLEnumType,
-    GraphQLInputObjectType,
-    GraphQLNonNull,
-    GraphQLObjectType,
-    GraphQLSchema,
-    GraphQLString,
+    buildSchema,
+    type GraphQLEnumType,
+    type GraphQLInputObjectType,
+    type GraphQLObjectType,
+    type GraphQLSchema,
 } from 'graphql';
 import { type SubschemaConfig } from '@graphql-tools/delegate';
 import PruneConfigTransform from '../src';
 import { type PruneConfigTransformConfig } from '../src/types';
 
-describe('Transform tests', () => {
-    const config: PruneConfigTransformConfig = {
-        descriptions: {
-            fields: true,
-            inputs: true,
-            enums: true,
-        },
-    };
+describe('PruneConfigTransform', () => {
+    let originalSchema: GraphQLSchema;
+    let transform: PruneConfigTransform;
 
-    const transform = new PruneConfigTransform({ config });
+    beforeEach(() => {
+        originalSchema = buildSchemaFromFile('schema.graphql');
+        // @ts-expect-error
+        (
+            originalSchema.getType('TestInput') as GraphQLInputObjectType
+        ).getFields().second.extensions.isCustomDescriptions = true;
 
-    const inputType = new GraphQLInputObjectType({
-        name: 'InputType',
-        fields: {
-            name: {
-                type: new GraphQLNonNull(GraphQLString),
-                description: 'Name input field',
-            },
-            custom: {
-                type: new GraphQLNonNull(GraphQLString),
-                description: 'Custom input field',
-                extensions: {
-                    isCustomDescriptions: true,
+        transform = new PruneConfigTransform({
+            config: {
+                descriptions: {
+                    fields: true,
+                    inputs: true,
+                    enums: true,
                 },
-            },
-        },
+            } as PruneConfigTransformConfig,
+        });
     });
 
-    const enumType = new GraphQLEnumType({
-        name: 'EnumType',
-        values: {
-            VALUE1: { description: 'First Value' },
-            VALUE2: { description: 'Second Value' },
-        },
+    it('Should before apply transformations to the schema', () => {
+        const inputType = originalSchema.getType('TestInput') as GraphQLInputObjectType;
+        expect(inputType.description).toBe('test-input-description');
+
+        const inputTypeFields = inputType.getFields();
+        expect(inputTypeFields.first.description).toBe('test-input-field-first-description');
+        expect(inputTypeFields.second.description).toBe('test-input-field-second-description');
+
+        const enumType = originalSchema.getType('TestEnum') as GraphQLEnumType;
+        expect(enumType.description).toBe('test-enum-description');
+
+        const enumTypeValues = enumType.getValues();
+        expect(enumTypeValues[0].description).toBe('test-enum-value-first-description');
+        expect(enumTypeValues[1].description).toBe('test-enum-value-second-description');
+
+        const queryTestField = originalSchema.getQueryType().getFields().test;
+        expect(queryTestField.description).toBe('query-test-description');
+
+        const fieldType = originalSchema.getType('TestResult') as GraphQLObjectType;
+        expect(fieldType.description).toBe('test-result-description');
+
+        const fieldTypeFields = fieldType.getFields();
+        expect(fieldTypeFields.first.description).toBe('test-result-field-first-description');
+        expect(fieldTypeFields.second.description).toBe('test-result-field-second-description');
     });
 
-    const testType = new GraphQLObjectType({
-        name: 'TestType',
-        fields: {
-            field: {
-                type: GraphQLString,
-                description: 'A field',
-            },
-            enum: {
-                type: enumType,
-                description: 'An enum field',
-            },
-        },
-    });
+    it('Should after apply transformations to the schema', () => {
+        const transformedSchema = transform.transformSchema(originalSchema, {} as SubschemaConfig);
 
-    const queryType = new GraphQLObjectType({
-        name: 'Query',
-        fields: {
-            test: {
-                type: testType,
-                args: {
-                    input: {
-                        type: inputType,
-                    },
-                },
-                resolve: () => ({}),
-            },
-        },
-    });
+        const inputType = transformedSchema.getType('TestInput') as GraphQLInputObjectType;
+        expect(inputType.description).toBeNull();
 
-    it('Should apply transformations to the schema', () => {
-        const schema = new GraphQLSchema({ query: queryType });
+        const inputTypeFields = inputType.getFields();
+        expect(inputTypeFields.first.description).toBeNull();
+        expect(inputTypeFields.second.description).toBe('test-input-field-second-description');
 
-        let inputTypeFields = (schema.getType('InputType') as GraphQLInputObjectType).getFields();
-        expect(inputTypeFields.name.description).toBe('Name input field');
-        expect(inputTypeFields.custom.description).toBe('Custom input field');
+        const enumType = transformedSchema.getType('TestEnum') as GraphQLEnumType;
+        expect(enumType.description).toBeNull();
 
-        let enumTypeValues = (schema.getType('EnumType') as GraphQLEnumType).getValues();
-        expect(enumTypeValues[0].description).toBe('First Value');
-        expect(enumTypeValues[1].description).toBe('Second Value');
-
-        let queryTypeFields = (
-            schema.getQueryType().getFields().test.type as GraphQLObjectType
-        ).getFields();
-        expect(queryTypeFields.field.description).toBe('A field');
-        expect(queryTypeFields.enum.description).toBe('An enum field');
-
-        const transformedSchema = transform.transformSchema(schema, {} as SubschemaConfig);
-
-        inputTypeFields = (
-            transformedSchema.getType('InputType') as GraphQLInputObjectType
-        ).getFields();
-        expect(inputTypeFields.name.description).toBeNull();
-        expect(inputTypeFields.custom.description).toBe('Custom input field');
-
-        enumTypeValues = (transformedSchema.getType('EnumType') as GraphQLEnumType).getValues();
+        const enumTypeValues = enumType.getValues();
         expect(enumTypeValues[0].description).toBeNull();
         expect(enumTypeValues[1].description).toBeNull();
 
-        queryTypeFields = (
-            transformedSchema.getQueryType().getFields().test.type as GraphQLObjectType
-        ).getFields();
-        expect(queryTypeFields.field.description).toBeNull();
-        expect(queryTypeFields.enum.description).toBeNull();
+        const queryTestField = transformedSchema.getQueryType().getFields().test;
+        expect(queryTestField.description).toBeNull();
+
+        const fieldType = transformedSchema.getType('TestResult') as GraphQLObjectType;
+        expect(fieldType.description).toBeNull();
+
+        const fieldTypeFields = fieldType.getFields();
+        expect(fieldTypeFields.first.description).toBeNull();
+        expect(fieldTypeFields.second.description).toBeNull();
     });
 });
+
+const buildSchemaFromFile = (filePath: string): GraphQLSchema => {
+    // eslint-disable-next-line unicorn/prefer-module
+    const schemaPath = path.join(__dirname, filePath);
+    const schemaString = fs.readFileSync(schemaPath, 'utf8');
+    return buildSchema(schemaString);
+};
