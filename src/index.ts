@@ -15,13 +15,13 @@ export default class PruneConfigTransform implements Transform {
         const schemaMapper: Record<string, any> = {};
         for (const kind in MapperKind) {
             // @ts-expect-error
-            schemaMapper[MapperKind[kind]] = (config: any) => this.apply(config);
+            schemaMapper[MapperKind[kind]] = (config: any) => this.prune(config);
         }
 
         return mapSchema(schema, schemaMapper);
     }
 
-    private apply(config: any): any {
+    private prune(config: any): any {
         if (this.config.descriptions && config.description && !config?.extensions?.description) {
             config.description = null;
         }
