@@ -1,0 +1,11 @@
+.bob
+.github
+coverage
+node_modules
+tests
+.eslintignore
+.prettierignore
+.prettierrc.mjs
+eslint.config.mjs
+jest.config.mjs
+tsconfig.json
