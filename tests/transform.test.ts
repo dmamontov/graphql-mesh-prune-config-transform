@@ -9,7 +9,6 @@ import {
     type GraphQLObjectType,
     type GraphQLSchema,
 } from 'graphql';
-import { type SubschemaConfig } from '@graphql-tools/delegate';
 import PruneConfigTransform from '../src';
 import { type PruneConfigTransformConfig } from '../src/types';
 
@@ -22,15 +21,11 @@ describe('PruneConfigTransform', () => {
         // @ts-expect-error
         (
             originalSchema.getType('TestInput') as GraphQLInputObjectType
-        ).getFields().second.extensions.isCustomDescriptions = true;
+        ).getFields().second.extensions.description = 'test-input-field-second-description';
 
         transform = new PruneConfigTransform({
             config: {
-                descriptions: {
-                    fields: true,
-                    inputs: true,
-                    enums: true,
-                },
+                descriptions: true,
             } as PruneConfigTransformConfig,
         });
     });
@@ -60,7 +55,7 @@ describe('PruneConfigTransform', () => {
     });
 
     it('Should after apply transformations to the schema', () => {
-        const transformedSchema = transform.transformSchema(originalSchema, {} as SubschemaConfig);
+        const transformedSchema = transform.transformSchema(originalSchema);
 
         const inputType = transformedSchema.getType('TestInput') as GraphQLInputObjectType;
         expect(inputType.description).toBeNull();

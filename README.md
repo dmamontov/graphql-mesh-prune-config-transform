@@ -4,7 +4,7 @@ This README provides a detailed guide on how to integrate and use the Prune Conf
 
 ## Installation
 
-Before you can use the prune-config-transform, you need to install it along with GraphQL Mesh if you haven't already done so. You can install these using npm or yarn.
+Before you can use the Prune Config Transform, you need to install it along with GraphQL Mesh if you haven't already done so. You can install these using npm or yarn.
 
 ```bash
 npm install @dmamontov/graphql-mesh-prune-config-transform
@@ -41,16 +41,8 @@ You need to include the Prune Config Transform in your GraphQL Mesh configuratio
 ```yaml
 transforms:
   - pruneConfig:
-      descriptions:
-        fields: true
-        inputs: true
-        enums: true
+      descriptions: true
 ```
-
-In this configuration:
-- fields: true - Removes descriptions from all fields in your GraphQL schema.
-- inputs: true - Removes descriptions from all input types in your GraphQL schema.
-- enums: true - Removes descriptions from all enums in your GraphQL schema.
 
 ## Conclusion
 
