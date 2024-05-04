@@ -1,6 +1,6 @@
 {
   "name": "@dmamontov/graphql-mesh-prune-config-transform",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "author": "Dmitry Mamontov",
   "type": "module",
   "repository": {
@@ -34,8 +34,7 @@
   "scripts": {
     "build": "bob build",
     "lint": "eslint src tests",
-    "test": "jest --coverage",
-    "npm:publish": "bob build && cd dist && npm publish"
+    "test": "jest --coverage"
   },
   "peerDependencies": {
     "@graphql-mesh/utils": "^0.97.5",
