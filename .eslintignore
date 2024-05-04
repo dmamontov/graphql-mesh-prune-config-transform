@@ -1,7 +1,9 @@
 tsconfig.json
 dist
-.eslintrc
-.prettierrc.cjs
+.bob
+coverage
+eslint.config.mjs
+.prettierrc.mjs
+jest.config.mjs
 yarn.lock
 node_modules
-.mesh

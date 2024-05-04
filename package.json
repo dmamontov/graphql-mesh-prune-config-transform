@@ -33,7 +33,7 @@
   "typings": "dist/typings/index.d.ts",
   "scripts": {
     "build": "bob build",
-    "lint": "eslint .",
+    "lint": "eslint src tests",
     "test": "jest --coverage"
   },
   "peerDependencies": {

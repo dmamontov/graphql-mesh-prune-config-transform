@@ -45,10 +45,8 @@ describe('PruneConfigTransform', () => {
 
         const enumType = originalSchema.getType('TestEnum') as GraphQLEnumType;
         expect(enumType.description).toBe('test-enum-description');
-
-        const enumTypeValues = enumType.getValues();
-        expect(enumTypeValues[0].description).toBe('test-enum-value-first-description');
-        expect(enumTypeValues[1].description).toBe('test-enum-value-second-description');
+        expect(enumType.getValue('FIRST').description).toBe('test-enum-value-first-description');
+        expect(enumType.getValue('SECOND').description).toBe('test-enum-value-second-description');
 
         const queryTestField = originalSchema.getQueryType().getFields().test;
         expect(queryTestField.description).toBe('query-test-description');
@@ -73,10 +71,8 @@ describe('PruneConfigTransform', () => {
 
         const enumType = transformedSchema.getType('TestEnum') as GraphQLEnumType;
         expect(enumType.description).toBeNull();
-
-        const enumTypeValues = enumType.getValues();
-        expect(enumTypeValues[0].description).toBeNull();
-        expect(enumTypeValues[1].description).toBeNull();
+        expect(enumType.getValue('FIRST').description).toBeNull();
+        expect(enumType.getValue('SECOND').description).toBeNull();
 
         const queryTestField = transformedSchema.getQueryType().getFields().test;
         expect(queryTestField.description).toBeNull();
