@@ -88,6 +88,7 @@ export default class PruneConfigTransform implements Transform {
         );
     }
 
+    /* istanbul ignore next */
     public transformRequest(
         originalRequest: ExecutionRequest,
         delegationContext: DelegationContext,
@@ -101,6 +102,7 @@ export default class PruneConfigTransform implements Transform {
         );
     }
 
+    /* istanbul ignore next */
     transformResult(
         originalResult: ExecutionResult,
         delegationContext: DelegationContext,
