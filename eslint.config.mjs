@@ -24,7 +24,7 @@ export default [
                 ...globals.node,
             },
             parserOptions: {
-                project: true,
+                project: './tsconfig.eslint.json',
                 tsconfigRootDir: import.meta.dirname,
             },
             parser: parserTs,
