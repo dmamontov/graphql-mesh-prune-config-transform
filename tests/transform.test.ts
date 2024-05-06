@@ -14,7 +14,6 @@ import { type PruneConfigTransformConfig } from '../src/types';
 
 describe('PruneConfigTransform', () => {
     let originalSchema: GraphQLSchema;
-    let transform: PruneConfigTransform;
 
     beforeEach(() => {
         originalSchema = buildSchemaFromFile('schema.graphql');
@@ -22,12 +21,6 @@ describe('PruneConfigTransform', () => {
         (
             originalSchema.getType('TestInput') as GraphQLInputObjectType
         ).getFields().second.extensions.description = 'test-input-field-second-description';
-
-        transform = new PruneConfigTransform({
-            config: {
-                descriptions: true,
-            } as PruneConfigTransformConfig,
-        });
     });
 
     it('Should before apply transformations to the schema', () => {
@@ -55,6 +48,12 @@ describe('PruneConfigTransform', () => {
     });
 
     it('Should after apply transformations to the schema', () => {
+        const transform = new PruneConfigTransform({
+            config: {
+                descriptions: true,
+            } as PruneConfigTransformConfig,
+        });
+
         const transformedSchema = transform.transformSchema(originalSchema);
 
         const inputType = transformedSchema.getType('TestInput') as GraphQLInputObjectType;
